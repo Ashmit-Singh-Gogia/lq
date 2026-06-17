@@ -17,11 +17,11 @@ type LicenseProvider struct {
 	GetURL  string
 }
 
-func NewLicenseProvider() *LicenseProvider {
+func NewLicenseProvider(listURL, getURL string) *LicenseProvider {
 	return &LicenseProvider{
 		Client:  http.DefaultClient,
-		ListURL: defaultLicenseListURL,
-		GetURL:  defaultLicenseGetURL,
+		ListURL: listURL,
+		GetURL:  getURL,
 	}
 }
 

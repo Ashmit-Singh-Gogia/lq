@@ -20,11 +20,11 @@ type GitignoreProvider struct {
 }
 
 // NewGitignoreProvider returns a provider with a default HTTP client
-func NewGitignoreProvider() *GitignoreProvider {
+func NewGitignoreProvider(listURL, getURL string) *GitignoreProvider {
 	return &GitignoreProvider{
 		Client:  http.DefaultClient,
-		ListURL: defaultGitignoreListURL,
-		GetURL:  defaultGitignoreGetURL,
+		ListURL: listURL,
+		GetURL:  getURL,
 	}
 }
 
