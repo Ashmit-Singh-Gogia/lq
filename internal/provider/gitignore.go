@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 )
 
 type GitignoreProvider struct {
@@ -61,7 +60,7 @@ func (g *GitignoreProvider) List() ([]Template, error) {
 	var stringArrayFormat []string
 	if err := json.Unmarshal(body, &stringArrayFormat); err == nil && len(stringArrayFormat) > 0 {
 		for _, name := range stringArrayFormat {
-			templates = append(templates, Template{Key: strings.ToLower(name), Name: name})
+			templates = append(templates, Template{Key: name, Name: name})
 		}
 		return templates, nil
 	}

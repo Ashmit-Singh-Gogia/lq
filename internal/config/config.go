@@ -15,7 +15,7 @@ type Config struct {
 
 const (
 	// Default URLs for fetching gitignore and license templates
-	DefaultGitignoreListURL = "https://www.toptal.com/developers/gitignore/api/list"
+	DefaultGitignoreListURL = "https://www.toptal.com/developers/gitignore/api/list?format=json"
 	DefaultGitignoreGetURL  = "https://www.toptal.com/developers/gitignore/api/%s"
 	DefaultLicenseListURL   = "https://api.github.com/licenses"
 	DefaultLicenseGetURL    = "https://api.github.com/licenses/%s"
