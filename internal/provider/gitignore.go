@@ -5,12 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"sort"
-)
-
-const (
-	defaultGitignoreListURL = "https://www.toptal.com/developers/gitignore/api/list?format=json"
-	defaultGitignoreGetURL  = "https://www.toptal.com/developers/gitignore/api/%s"
+	"strings"
 )
 
 type GitignoreProvider struct {
@@ -33,7 +28,7 @@ type gitignoreItem struct {
 	FileName string `json:"fileName"`
 }
 
-// List fetches all available gitignore templates
+// List fetches all available gitignore templates using a try-and-fallback parsing strategy
 func (g *GitignoreProvider) List() ([]Template, error) {
 	response, err := g.Client.Get(g.ListURL)
 	if err != nil {
@@ -46,24 +41,44 @@ func (g *GitignoreProvider) List() ([]Template, error) {
 	}
 
 	// Toptal returns a list of key-name pairs
-	var rawMap map[string]gitignoreItem
-	if err := json.NewDecoder(response.Body).Decode(&rawMap); err != nil {
-		return nil, fmt.Errorf("failed to parse json: %w", err)
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
 	}
 
 	var templates []Template
-	for k, item := range rawMap {
-		templates = append(templates, Template{
-			Key:  k,
-			Name: item.Name,
-		})
+
+	// Schema 1: Map Format (e.g., Toptal API)
+	var mapFormat map[string]gitignoreItem
+	if err := json.Unmarshal(body, &mapFormat); err == nil && len(mapFormat) > 0 {
+		for key, val := range mapFormat {
+			templates = append(templates, Template{Key: key, Name: val.Name})
+		}
+		return templates, nil
 	}
 
-	sort.Slice(templates, func(i, j int) bool {
-		return templates[i].Name < templates[j].Name
-	})
+	// Schema 2: Flat String Array Format (e.g., GitHub API)
+	var stringArrayFormat []string
+	if err := json.Unmarshal(body, &stringArrayFormat); err == nil && len(stringArrayFormat) > 0 {
+		for _, name := range stringArrayFormat {
+			templates = append(templates, Template{Key: strings.ToLower(name), Name: name})
+		}
+		return templates, nil
+	}
 
-	return templates, nil
+	// Schema 3: Object Array Format (e.g., GitLab API)
+	var objectArrayFormat []struct {
+		Key  string `json:"key"`
+		Name string `json:"name"`
+	}
+	if err := json.Unmarshal(body, &objectArrayFormat); err == nil && len(objectArrayFormat) > 0 {
+		for _, val := range objectArrayFormat {
+			templates = append(templates, Template{Key: val.Key, Name: val.Name})
+		}
+		return templates, nil
+	}
+
+	return nil, fmt.Errorf("unsupported API schema returned from %s", g.ListURL)
 }
 
 // GetContent fetches the raw text of a specific gitignore template
