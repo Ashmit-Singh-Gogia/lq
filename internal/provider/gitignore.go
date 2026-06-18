@@ -40,7 +40,6 @@ func (g *GitignoreProvider) List() ([]Template, error) {
 		return nil, fmt.Errorf("%w: status %d", ErrFetchFailed, response.StatusCode)
 	}
 
-	// Toptal returns a list of key-name pairs
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
@@ -83,7 +82,6 @@ func (g *GitignoreProvider) List() ([]Template, error) {
 
 // GetContent fetches the raw text of a specific gitignore template
 func (g *GitignoreProvider) GetContent(key string) (string, error) {
-	// Use PathEscape (GitHub and Toptal handle C++ natively)
 	escapedKey := url.PathEscape(key)
 	targetURL := fmt.Sprintf(g.GetURL, escapedKey)
 
@@ -93,7 +91,6 @@ func (g *GitignoreProvider) GetContent(key string) (string, error) {
 	}
 	defer func() { _ = response.Body.Close() }()
 
-	// The ultimate safety net: catch 404s and 500s explicitly
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
 		return "", fmt.Errorf("provider returned error status: %s for URL: %s", response.Status, targetURL)
 	}
@@ -117,6 +114,5 @@ func (g *GitignoreProvider) GetContent(key string) (string, error) {
 		}
 	}
 
-	// Fallback for raw text APIs
 	return string(body), nil
 }

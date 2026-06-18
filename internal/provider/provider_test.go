@@ -40,7 +40,6 @@ func TestLicenseGetContent(t *testing.T) {
 	}))
 	defer server.Close()
 
-	// 2. Configure
 	p := NewLicenseProvider("http://dummy-fallback-list", server.URL+"/%s")
 
 	// 3. Test

@@ -76,7 +76,6 @@ func (l *LicenseProvider) GetContent(key string) (string, error) {
 		return "", err
 	}
 
-	// Try checking if it returned JSON containing a text field
 	var jsonResponse struct {
 		Body    string `json:"body"`    // GitHub schema
 		Content string `json:"content"` // GitLab schema
